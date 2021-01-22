@@ -27,22 +27,14 @@ codeunit 50100 MetaWeather
         exit(Token.AsValue());
     end;
 
-    procedure GetLocations(Search: Text; var TempLocation: Record "Weather Location" temporary)
+    local procedure JsonToLocation(LocationsArray: JsonArray; var TempLocation: Record "Weather Location" temporary)
     var
-        Client: HttpClient;
-        Response: HttpResponseMessage;
-        Content: Text;
-        LocationsArray: JsonArray;
         JToken: JsonToken;
         LocationObject: JsonObject;
     begin
-        Client.Get(GetSearchUrl(Search), Response);
-
         TempLocation.Reset();
         TempLocation.DeleteAll();
 
-        Response.Content.ReadAs(Content);
-        LocationsArray.ReadFrom(Content);
         foreach JToken in LocationsArray do begin
             LocationObject := JToken.AsObject();
             TempLocation.WOEID := GetTokenValue(LocationObject, 'woeid').AsInteger();
@@ -52,23 +44,15 @@ codeunit 50100 MetaWeather
         end;
     end;
 
-    procedure GetForecast(WOEID: Integer; var TempForecast: Record "Weather Forecast" temporary)
+    local procedure JsonToForecast(Results: JsonObject; var TempForecast: Record "Weather Forecast" temporary)
     var
-        Client: HttpClient;
-        Response: HttpResponseMessage;
-        Content: Text;
-        Results: JsonObject;
         ConsolidatedWeather: JsonArray;
         JToken: JsonToken;
         WeatherObject: JsonObject;
     begin
-        Client.Get(GetForecastUrl(WOEID), Response);
-
         TempForecast.Reset();
         TempForecast.DeleteAll();
 
-        Response.Content.ReadAs(Content);
-        Results.ReadFrom(Content);
         ConsolidatedWeather := GetToken(Results, 'consolidated_weather').AsArray();
 
         foreach JToken in ConsolidatedWeather do begin
@@ -80,5 +64,33 @@ codeunit 50100 MetaWeather
             TempForecast."Max. Temperature" := GetTokenValue(WeatherObject, 'max_temp').AsDecimal();
             TempForecast.Insert();
         end;
+    end;
+
+    procedure GetLocations(Search: Text; var TempLocation: Record "Weather Location" temporary)
+    var
+        Client: HttpClient;
+        Response: HttpResponseMessage;
+        Content: Text;
+        LocationsArray: JsonArray;
+    begin
+        Client.Get(GetSearchUrl(Search), Response);
+
+        Response.Content.ReadAs(Content);
+        LocationsArray.ReadFrom(Content);
+        JsonToLocation(LocationsArray, TempLocation);
+    end;
+
+    procedure GetForecast(WOEID: Integer; var TempForecast: Record "Weather Forecast" temporary)
+    var
+        Client: HttpClient;
+        Response: HttpResponseMessage;
+        Content: Text;
+        Results: JsonObject;
+    begin
+        Client.Get(GetForecastUrl(WOEID), Response);
+
+        Response.Content.ReadAs(Content);
+        Results.ReadFrom(Content);
+        JsonToForecast(Results, TempForecast);
     end;
 }
