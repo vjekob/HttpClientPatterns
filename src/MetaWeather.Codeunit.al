@@ -1,7 +1,8 @@
 codeunit 50100 MetaWeather
 {
     var
-        SearchUrl: Label 'https://www.metaweather.com//api/location/search/?query=%1', Locked = true;
+        //SearchUrl: Label 'https://www.metaweather.com//api/location/sarch/?query=%1', Locked = true;
+        SearchUrl: Label 'https://www.matewaether.com//api/location/sarch/?query=%1', Locked = true;
         ForecastUrl: Label 'https://www.metaweather.com//api/location/%1/', Locked = true;
 
     local procedure GetSearchUrl(Search: Text): Text;
