@@ -13,15 +13,15 @@ codeunit 50101 "Http Management"
         // - ...
     end;
 
-    procedure Get(Url: Text; var Response: HttpResponseMessage) Success: Boolean
+    procedure Execute(Request: Interface IHttpRequest) Success: Boolean
     var
-        Client: HttpClient;
+        Response: HttpResponseMessage;
     begin
         // TODO: perform pre-invocation checks
         // - validate permissions
         // - validate URL
         // - ...
 
-        Success := IsSuccessfulRequest(Client.Get(Url, Response), Response);
+        Success := IsSuccessfulRequest(Request.Execute(Response), Response);
     end;
 }

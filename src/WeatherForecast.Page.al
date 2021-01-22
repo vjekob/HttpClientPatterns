@@ -23,9 +23,12 @@ page 50100 "Weather Forecast"
 
                     trigger OnValidate()
                     var
-                        MetaWeather: Codeunit MetaWeather;
+                        MetaWeatherSearch: Codeunit "MetaWeather Search";
+                        Http: Codeunit "Http Management";
                     begin
-                        MetaWeather.GetLocations(Search, Rec);
+                        MetaWeatherSearch.Search(Search);
+                        if Http.Execute(MetaWeatherSearch) then
+                            MetaWeatherSearch.ReadSearchResults(Rec);
                     end;
                 }
             }

@@ -38,9 +38,13 @@ page 50101 "Weather Forecast Subpage"
 
     procedure Update(WOEID: Integer)
     var
-        MetaWeather: Codeunit MetaWeather;
+        MetaWeatherForecast: Codeunit "MetaWeather Forecast";
+        Http: Codeunit "Http Management";
     begin
-        MetaWeather.GetForecast(WOEID, Rec);
-        CurrPage.Update(false);
+        MetaWeatherForecast.ForecastFor(WOEID);
+        if Http.Execute(MetaWeatherForecast) then begin
+            MetaWeatherForecast.ReadForecast(Rec);
+            CurrPage.Update(false);
+        end;
     end;
 }
