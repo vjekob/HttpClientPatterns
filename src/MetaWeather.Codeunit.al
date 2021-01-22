@@ -74,7 +74,10 @@ codeunit 50100 MetaWeather
         Content: Text;
         LocationsArray: JsonArray;
     begin
-        Client.Get(GetSearchUrl(Search), Response);
+        if (not Client.Get(GetSearchUrl(Search), Response)) or (not Response.IsSuccessStatusCode()) then begin
+            // TODO: Log the error, handle it, do something about it here
+            Error('Something went wrong: %1', GetLastErrorText);
+        end;
 
         Response.Content.ReadAs(Content);
         LocationsArray.ReadFrom(Content);
@@ -88,7 +91,10 @@ codeunit 50100 MetaWeather
         Content: Text;
         Results: JsonObject;
     begin
-        Client.Get(GetForecastUrl(WOEID), Response);
+        if (not Client.Get(GetForecastUrl(WOEID), Response)) or (not Response.IsSuccessStatusCode()) then begin
+            // TODO: Log the error, handle it, do something about it here
+            Error('Something went wrong: %1', GetLastErrorText);
+        end;
 
         Response.Content.ReadAs(Content);
         Results.ReadFrom(Content);
