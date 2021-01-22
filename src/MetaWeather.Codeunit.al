@@ -1,9 +1,8 @@
 codeunit 50100 MetaWeather
 {
     var
-        //SearchUrl: Label 'https://www.metaweather.com//api/location/sarch/?query=%1', Locked = true;
-        SearchUrl: Label 'https://www.matewaether.com//api/location/sarch/?query=%1', Locked = true;
-        ForecastUrl: Label 'https://www.metaweather.com//api/location/%1/', Locked = true;
+        SearchUrl: Label 'https://www.metaweather.com/api/location/search/?query=%1', Locked = true;
+        ForecastUrl: Label 'https://www.metaweather.com/api/location/%1/', Locked = true;
 
     local procedure GetSearchUrl(Search: Text): Text;
     begin
@@ -67,23 +66,14 @@ codeunit 50100 MetaWeather
         end;
     end;
 
-    local procedure IsSuccessfulRequest(TransportOK: Boolean; Response: HttpResponseMessage): Boolean
-    begin
-        if TransportOK and Response.IsSuccessStatusCode() then
-            exit(true);
-
-        // TODO: Log the error, handle it, do something about it here
-        Error('Something went wrong: %1', GetLastErrorText);
-    end;
-
     procedure GetLocations(Search: Text; var TempLocation: Record "Weather Location" temporary)
     var
-        Client: HttpClient;
+        Client: Codeunit "Http Management";
         Response: HttpResponseMessage;
         Content: Text;
         LocationsArray: JsonArray;
     begin
-        if not IsSuccessfulRequest(Client.Get(GetSearchUrl(Search), Response), Response) then
+        if not Client.Get(GetSearchUrl(Search), Response) then
             exit;
 
         Response.Content.ReadAs(Content);
@@ -93,12 +83,12 @@ codeunit 50100 MetaWeather
 
     procedure GetForecast(WOEID: Integer; var TempForecast: Record "Weather Forecast" temporary)
     var
-        Client: HttpClient;
+        Client: Codeunit "Http Management";
         Response: HttpResponseMessage;
         Content: Text;
         Results: JsonObject;
     begin
-        if not IsSuccessfulRequest(Client.Get(GetForecastUrl(WOEID), Response), Response) then
+        if not Client.Get(GetForecastUrl(WOEID), Response) then
             exit;
 
         Response.Content.ReadAs(Content);
