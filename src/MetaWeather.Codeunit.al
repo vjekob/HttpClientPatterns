@@ -67,6 +67,15 @@ codeunit 50100 MetaWeather
         end;
     end;
 
+    local procedure IsSuccessfulRequest(TransportOK: Boolean; Response: HttpResponseMessage): Boolean
+    begin
+        if TransportOK and Response.IsSuccessStatusCode() then
+            exit(true);
+
+        // TODO: Log the error, handle it, do something about it here
+        Error('Something went wrong: %1', GetLastErrorText);
+    end;
+
     procedure GetLocations(Search: Text; var TempLocation: Record "Weather Location" temporary)
     var
         Client: HttpClient;
@@ -74,10 +83,8 @@ codeunit 50100 MetaWeather
         Content: Text;
         LocationsArray: JsonArray;
     begin
-        if (not Client.Get(GetSearchUrl(Search), Response)) or (not Response.IsSuccessStatusCode()) then begin
-            // TODO: Log the error, handle it, do something about it here
-            Error('Something went wrong: %1', GetLastErrorText);
-        end;
+        if not IsSuccessfulRequest(Client.Get(GetSearchUrl(Search), Response), Response) then
+            exit;
 
         Response.Content.ReadAs(Content);
         LocationsArray.ReadFrom(Content);
@@ -91,10 +98,8 @@ codeunit 50100 MetaWeather
         Content: Text;
         Results: JsonObject;
     begin
-        if (not Client.Get(GetForecastUrl(WOEID), Response)) or (not Response.IsSuccessStatusCode()) then begin
-            // TODO: Log the error, handle it, do something about it here
-            Error('Something went wrong: %1', GetLastErrorText);
-        end;
+        if not IsSuccessfulRequest(Client.Get(GetForecastUrl(WOEID), Response), Response) then
+            exit;
 
         Response.Content.ReadAs(Content);
         Results.ReadFrom(Content);
